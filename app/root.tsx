@@ -9,6 +9,10 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { Provider } from "./components/ui/provider";
+import Navbar from "./components/ui/navbar";
+import { Box, Flex } from "@chakra-ui/react";
+import { Toaster } from "./components/ui/toaster";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -42,7 +46,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <Provider>
+      <Flex
+        minH="100vh"
+        bg={{ base: "white", _dark: "black" }}
+        direction={{ base: "column", md: "row" }}
+      >
+        <Box
+          position="sticky"
+          top="0"
+          left="0"
+          overflowY="auto"
+          flexShrink="0"
+          h={{ base: "100%", md: "100vh" }}
+          zIndex={1000}
+        >
+          <Navbar />
+        </Box>
+        <Box flex="1" p={{ base: 4, md: 8 }} overflowX="hidden" minH="100vh">
+          <Outlet />
+          <Toaster />
+        </Box>
+      </Flex>
+    </Provider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
