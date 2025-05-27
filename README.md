@@ -1,87 +1,99 @@
-# Welcome to React Router!
+# 🍻 Cervecería Artesanal App
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Welcome to the Cervecería Artesanal App\! This is a modern, client-side web application built with **React**, **Vite**, and **React Router v7**, demonstrating a CRUD (Create, Read, Update, Delete) interface for managing beer products. It connects to a **GraphQL API Gateway** using **Apollo Client**.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+[](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
 
-## Features
+## ✨ Features
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- **Modern Frontend:** Built with React 19 and Vite for a blazing-fast development experience and optimized production builds.
+- **Intuitive Routing:** Powered by React Router v7 for declarative and robust navigation.
+- **Authentication Flow:** Includes secure login and registration routes with authentication guarding using `AuthRouter`.
+- **GraphQL Integration:** Uses Apollo Client for efficient data fetching and mutations, interacting with a GraphQL API Gateway.
+- **CRUD Operations:** Full Create, Read, Update, and Delete functionality for managing beer products.
+- **Responsive UI:** Styled with **Chakra UI** and **Tailwind CSS** for a beautiful and adaptive user experience across devices.
+- **Performance Optimized:** Leverages React's `lazy` and `Suspense` for **code splitting** to ensure faster initial page loads.
+- **Theming:** Supports light and dark mode toggling.
 
-## Getting Started
+## 🚀 Getting Started
+
+Follow these steps to get the Cervecería Artesanal App up and running on your local machine.
+
+### Prerequisites
+
+- Node.js (v18 or higher, v20.11.1 recommended)
+- npm (or yarn/pnpm)
+- A running **GraphQL API Gateway** (this frontend expects one to be available for data operations).
 
 ### Installation
 
-Install the dependencies:
-
-```bash
-npm install
-```
+1.  **Clone the repository:**
+    ```bash
+    git clone <your-repo-url>
+    cd frontend-beer
+    ```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    # or yarn install
+    # or pnpm install
+    ```
 
 ### Development
 
-Start the development server with HMR:
+Start the development server with Hot Module Replacement (HMR):
 
 ```bash
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+Your application will be available at `http://localhost:5173`. Changes to your code will hot-reload in the browser.
 
-## Building for Production
+### Type Checking
 
-Create a production build:
+Check for TypeScript errors:
+
+```bash
+npm run typecheck
+```
+
+## 📦 Building for Production
+
+Create an optimized production-ready build of your application:
 
 ```bash
 npm run build
 ```
 
-## Deployment
+This command will compile and optimize your code into the `dist/` directory.
 
-### Docker Deployment
+### Previewing the Production Build
 
-To build and run using Docker:
+After building, you can locally preview the production version to ensure everything works as expected before deployment:
 
 ```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
+npm run preview
 ```
 
-The containerized application can be deployed to any platform that supports Docker, including:
+## 🌐 Deployment
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
+The `npm run build` command generates static files in the `dist/` directory. This output can be easily deployed to any static site hosting service.
 
-### DIY Deployment
+Examples of suitable platforms include:
 
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
+- Netlify
+- Vercel
+- GitHub Pages
+- Firebase Hosting
+- AWS S3 + CloudFront
+- Cloudflare Pages
 
-Make sure to deploy the output of `npm run build`
+Simply upload the contents of your `dist/` folder to your chosen hosting provider.
 
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
+## 🎨 Styling
 
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+This project utilizes **Chakra UI** for its robust component library and responsive styling capabilities, alongside **Tailwind CSS** for utility-first styling and efficient design. Both are pre-configured for a seamless development experience.
 
 ---
 
-Built with ❤️ using React Router.
+Built with ❤️ and a passion for craft beers.

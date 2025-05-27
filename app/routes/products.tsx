@@ -1,4 +1,7 @@
-import { toaster } from "@/components/ui/toaster";
+import { useState } from "react";
+
+import { useMutation, useQuery } from "@apollo/client";
+
 import {
   Box,
   Button,
@@ -12,78 +15,216 @@ import {
   CloseButton,
   Fieldset,
   Field,
-  NativeSelect,
+  Center,
+  Spinner,
+  Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
+
+import { toaster } from "@/components/ui/toaster";
+import {
+  ALL_PRODUCTS,
+  CREATE_PRODUCT,
+  DELETE_PRODUCT,
+  UPDATE_PRODUCT,
+} from "@/graphql/products";
+import useAuthStore from "@/store/auth";
+
 
 type Product = {
-  id: number;
-  name: string;
-  price: number;
-  stock: number;
-  category?: string;
+  id?: number;
+  username?: string;
+  name?: string;
+  price?: number;
+  stock?: number;
+  size?: number;
 };
 
 const initialProducts: Product[] = [
-  { id: 1, name: "Cerveza IPA", price: 8.99, stock: 150, category: "IPA" },
-  { id: 2, name: "Cerveza Stout", price: 9.5, stock: 80, category: "Oscura" },
-  { id: 3, name: "Cerveza Trigo", price: 7.99, stock: 120, category: "Blanca" },
+  { id: 1, name: "Cerveza IPA", price: 8.99, stock: 150, size: 100 },
+  { id: 2, name: "Cerveza Stout", price: 9.5, stock: 80, size: 400 },
+  { id: 3, name: "Cerveza Trigo", price: 7.99, stock: 120, size: 600 },
 ];
 
-const categories = ["IPA", "Oscura", "Blanca", "Pilsen", "Ale"];
+type CreateProductInput = Omit<Product, "id">;
+type UpdateProductInput = Partial<Omit<Product, "id">>;
 
 export default function ProductsPage() {
-  // Estados
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState<Partial<Product> | null>(
+    null,
+  );
   const [open, setOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const { user } = useAuthStore();
 
-  // Handlers CRUD
+  const {
+    data,
+    loading: queryLoading,
+    error: queryError,
+    refetch,
+  } = useQuery<{ allProducts: Product[] }>(ALL_PRODUCTS, {
+    onError: (error) => {
+      toaster.create({
+        title: "Error cargando productos",
+        description: error.message,
+        type: "error",
+        duration: 3000,
+      });
+    },
+  });
+
+  const [createProduct, { loading: createLoading, error: createError }] =
+    useMutation<{ createProduct: Product }, { data: CreateProductInput }>(
+      CREATE_PRODUCT,
+      {
+        update(cache, { data }) {
+          const newProduct = data?.createProduct;
+          if (newProduct) {
+            cache.modify({
+              fields: {
+                allProducts(existingProducts = []) {
+                  return [...existingProducts, newProduct];
+                },
+              },
+            });
+          }
+        },
+        onCompleted: () => {
+          toaster.create({
+            title: "Producto creado",
+            type: "success",
+            duration: 2000,
+          });
+          setOpen(false);
+        },
+        onError: (error) => {
+          toaster.create({
+            title: "Error al crear producto",
+            description: error.message,
+            type: "error",
+            duration: 3000,
+          });
+        },
+      },
+    );
+
+  const [updateProduct, { loading: updateLoading, error: updateError }] =
+    useMutation<
+      { updateProduct: Product },
+      { updateProductId: number; data: UpdateProductInput }
+    >(UPDATE_PRODUCT, {
+      refetchQueries: [{ query: ALL_PRODUCTS }],
+      onCompleted: () => {
+        toaster.create({
+          title: "Producto actualizado",
+          type: "warning",
+          duration: 2000,
+        });
+        setOpen(false);
+      },
+      onError: (error) => {
+        toaster.create({
+          title: "Error al actualizar producto",
+          description: error.message,
+          type: "error",
+          duration: 3000,
+        });
+      },
+    });
+
+  const [deleteProduct, { loading: deleteLoading, error: deleteError }] =
+    useMutation<{ deleteProduct: string }, { deleteProductId: number }>(
+      DELETE_PRODUCT,
+      {
+        refetchQueries: [{ query: ALL_PRODUCTS }],
+        onCompleted: () => {
+          toaster.create({
+            title: "Producto eliminado",
+            type: "error",
+            duration: 2000,
+          });
+        },
+        onError: (error) => {
+          toaster.create({
+            title: "Error al eliminar producto",
+            description: error.message,
+            type: "error",
+            duration: 3000,
+          });
+        },
+      },
+    );
+
   const handleCreate = () => {
-    setCurrentProduct({ id: 0, name: "", price: 0, stock: 0 });
+    setCurrentProduct({ name: "", price: 0, stock: 0, size: 0 });
     setIsEditing(false);
     setOpen(true);
   };
 
   const handleEdit = (product: Product) => {
-    setCurrentProduct(product);
+    setCurrentProduct({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      stock: product.stock,
+      size: product.size,
+    });
     setIsEditing(true);
     setOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setProducts(products.filter((p) => p.id !== id));
-    toaster.create({
-      title: "Producto eliminado",
-      type: "error",
-      duration: 2000,
-    });
+  const handleDelete = (id: number | undefined) => {
+    if (!id) return;
+
+    if (
+      window.confirm("¿Estás seguro de que quieres eliminar este producto?")
+    ) {
+      deleteProduct({ variables: { deleteProductId: id } });
+    }
   };
 
-  const handleSubmit = () => {
-    if (isEditing) {
-      // Actualizar
-      setProducts(
-        products.map((p) => (p.id === currentProduct!.id ? currentProduct! : p))
-      );
-      toaster.create({
-        title: "Producto actualizado",
-        type: "warning",
-        duration: 2000,
-      });
-    } else {
-      // Crear
-      const newId = Math.max(...products.map((p) => p.id)) + 1;
-      setProducts([...products, { ...currentProduct!, id: newId }]);
-      toaster.create({
-        title: "Producto creado",
-        type: "success",
-        duration: 2000,
-      });
-    }
-    setOpen(false);
+  const handleSubmit = async () => {
+    if (!currentProduct) return;
+
+    const { id, ...input } = currentProduct;
+
+    input.username = user?.username;
+
+    try {
+      if (isEditing) {
+        await updateProduct({
+          variables: { updateProductId: id!, data: input },
+        });
+      } else {
+        await createProduct({ variables: { data: input } });
+      }
+    } catch (error) {}
   };
+
+  if (queryLoading) {
+    return (
+      <Center flexDirection="column" minH="100vh">
+        <Spinner color="blue.500" size="xl" />
+        <Text fontSize="xl" mt={4}>
+          Cargando productos...
+        </Text>
+      </Center>
+    );
+  }
+
+  if (queryError) {
+    return (
+      <Center flexDirection="column" minH="100vh">
+        <Text color="red.500" fontSize="xl">
+          Error al cargar productos: {queryError.message}
+        </Text>
+        <Button mt={4} onClick={() => refetch()}>
+          Reintentar
+        </Button>
+      </Center>
+    );
+  }
+
+  const products = data?.allProducts || initialProducts;
 
   return (
     <Box p={6}>
@@ -103,6 +244,7 @@ export default function ProductsPage() {
               <Table.Cell>Nombre</Table.Cell>
               <Table.Cell>Precio ($)</Table.Cell>
               <Table.Cell>Stock</Table.Cell>
+              <Table.Cell>Size</Table.Cell>
               <Table.Cell>Acciones</Table.Cell>
             </Table.Row>
           </Table.Header>
@@ -111,21 +253,22 @@ export default function ProductsPage() {
               <Table.Row key={product.id}>
                 <Table.Cell>{product.id}</Table.Cell>
                 <Table.Cell>{product.name}</Table.Cell>
-                <Table.Cell>{product.price.toFixed(2)}</Table.Cell>
+                <Table.Cell>{product.price?.toFixed(2)}</Table.Cell>
                 <Table.Cell>{product.stock}</Table.Cell>
+                <Table.Cell>{product.size}</Table.Cell>
                 <Table.Cell>
                   <Stack direction="row" gap={2}>
                     <Button
-                      size="sm"
                       colorScheme="blue"
+                      size="sm"
                       onClick={() => handleEdit(product)}
                     >
                       Editar
                     </Button>
                     <Button
-                      size="sm"
                       colorScheme="red"
-                      onClick={() => handleDelete(product.id)}
+                      size="sm"
+                      onClick={() => handleDelete(product?.id)}
                     >
                       Eliminar
                     </Button>
@@ -149,9 +292,9 @@ export default function ProductsPage() {
                 </Dialog.Title>
                 <Dialog.CloseTrigger asChild>
                   <CloseButton
-                    size="sm"
                     position="absolute"
                     right={2}
+                    size="sm"
                     top={2}
                   />
                 </Dialog.CloseTrigger>
@@ -202,33 +345,24 @@ export default function ProductsPage() {
                     </Field.Root>
 
                     <Field.Root>
-                      <Field.Label>Categoría</Field.Label>
-                      <NativeSelect.Root>
-                        <NativeSelect.Field
-                          name="category"
-                          value={currentProduct?.category || "IPA"}
-                          onChange={(e) =>
-                            setCurrentProduct({
-                              ...currentProduct!,
-                              category: e.currentTarget.value,
-                            })
-                          }
-                        >
-                          {categories.map((category) => (
-                            <option key={category} value={category}>
-                              {category}
-                            </option>
-                          ))}
-                        </NativeSelect.Field>
-                        <NativeSelect.Indicator />
-                      </NativeSelect.Root>
+                      <Field.Label>Size</Field.Label>
+                      <Input
+                        type="number"
+                        value={currentProduct?.size || 0}
+                        onChange={(e) =>
+                          setCurrentProduct({
+                            ...currentProduct!,
+                            size: parseInt(e.target.value),
+                          })
+                        }
+                      />
                     </Field.Root>
                   </Fieldset.Content>
                 </Fieldset.Root>
               </Dialog.Body>
 
               <Dialog.Footer>
-                <Button variant="outline" mr={3} onClick={() => setOpen(false)}>
+                <Button mr={3} variant="outline" onClick={() => setOpen(false)}>
                   Cancelar
                 </Button>
                 <Button colorScheme="blue" onClick={handleSubmit}>

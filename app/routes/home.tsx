@@ -1,5 +1,5 @@
-import { ColorModeButton, useColorModeValue } from "@/components/ui/color-mode";
-import type { Route } from "./+types/home";
+import { FaBeer, FaStar } from "react-icons/fa";
+
 import {
   Box,
   Button,
@@ -15,7 +15,8 @@ import {
   Tag,
   Text,
 } from "@chakra-ui/react";
-import { FaBeer, FaStar } from "react-icons/fa";
+
+import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -60,14 +61,14 @@ export default function Home() {
     <Box bg={"orange.contrast"} minH="100vh" p={{ base: 4, md: 8 }}>
       {/* Hero Section */}
       <Stack
-        direction={{ base: "column", md: "row" }}
         align="center"
+        direction={{ base: "column", md: "row" }}
         mb={12}
         spaceX={8}
         spaceY={8}
       >
         <Box flex={1}>
-          <Heading as="h1" size="2xl" mb={4} bg="gray.contrast">
+          <Heading as="h1" bg="gray.contrast" mb={4} size="2xl">
             <Icon as={FaBeer} mr={2} /> Bienvenidos a BeerShop
           </Heading>
           <Text fontSize="xl" mb={6}>
@@ -79,10 +80,10 @@ export default function Home() {
         </Box>
         <Box flex={1}>
           <Image
-            src="https://images.unsplash.com/photo-1505075106905-fb052892c116?w=800"
             alt="Cervezas artesanales"
             borderRadius="lg"
             boxShadow="xl"
+            src="https://images.unsplash.com/photo-1505075106905-fb052892c116?w=800"
           />
         </Box>
       </Stack>
@@ -91,10 +92,10 @@ export default function Home() {
       <Box py={8}>
         <Heading
           as="h2"
-          size="xl"
-          mb={8}
-          textAlign="center"
           color="bg.inverted"
+          mb={8}
+          size="xl"
+          textAlign="center"
         >
           Nuestras Especialidades
         </Heading>
@@ -102,24 +103,24 @@ export default function Home() {
         <SimpleGrid columns={{ base: 1, lg: 3 }} gap={6}>
           {featuredBeers.map((beer) => (
             <Card.Root
-              key={beer.id}
+              _hover={{ transform: "scale(1.03)", transition: "all 0.3s" }}
               bg="orange.contrast"
               boxShadow="md"
+              key={beer.id}
               margin={{ base: "auto", lg: "initial" }}
               width={{ base: "360px", lg: "100%" }}
-              _hover={{ transform: "scale(1.03)", transition: "all 0.3s" }}
             >
               <CardBody>
                 <Image
-                  src={beer.image}
                   alt={beer.name}
                   borderRadius="lg"
                   h="200px"
-                  w="100%"
                   objectFit="cover"
+                  src={beer.image}
+                  w="100%"
                 />
                 <Stack mt={4}>
-                  <Flex justify="space-between" align="center">
+                  <Flex align="center" justify="space-between">
                     <Heading size="md">{beer.name}</Heading>
                     <Tag.Root colorScheme="normal">{beer.price}</Tag.Root>
                   </Flex>
@@ -143,12 +144,12 @@ export default function Home() {
       {/* Brewery Info */}
       <Box
         bg={"orange.subtle"}
-        p={8}
         borderRadius="xl"
         mt={12}
+        p={8}
         textAlign="center"
       >
-        <Heading as="h3" size="lg" mb={4} color={"bg.inverted"}>
+        <Heading as="h3" color={"bg.inverted"} mb={4} size="lg">
           Visita Nuestra Cervecería
         </Heading>
         <Text mb={6}>Horario: Lunes a Sábado - 12:00 a 23:00 hrs</Text>

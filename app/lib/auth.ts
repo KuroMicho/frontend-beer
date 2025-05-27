@@ -1,53 +1,39 @@
-// src/lib/auth.ts
-export const getAccessToken = () => {
+/**
+ * Retrieves the access token from localStorage.
+ * @returns The access token string, or null if not found.
+ */
+export const getAccessToken = (): string | null => {
   return localStorage.getItem("accessToken");
 };
 
-export const setAccessToken = (token: string) => {
+/**
+ * Stores the access token in localStorage.
+ * @param token The access token string to store.
+ */
+export const setAccessToken = (token: string): void => {
   localStorage.setItem("accessToken", token);
 };
 
-export const removeTokens = () => {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
+/**
+ * Retrieves the refresh token from localStorage.
+ * @returns The refresh token string, or null if not found.
+ */
+export const getRefreshToken = (): string | null => {
+  return localStorage.getItem("refreshToken");
 };
 
-export const refreshToken = async () => {
-  try {
-    const refreshToken = localStorage.getItem("refreshToken");
-    if (!refreshToken) return null;
+/**
+ * Stores the refresh token in localStorage.
+ * @param token The refresh token string to store.
+ */
+export const setRefreshToken = (token: string): void => {
+  localStorage.setItem("refreshToken", token);
+};
 
-    const response = await fetch("http://localhost:4000/graphql", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: `
-            mutation RefreshToken($refreshInput: RefreshTokenInput!) {
-              refreshToken(refreshInput: $refreshInput) {
-                accessToken
-                refreshToken
-              }
-            }
-          `,
-        variables: {
-          refreshInput: {
-            refreshToken: refreshToken,
-          },
-        },
-      }),
-    });
-
-    const { data } = await response.json();
-    if (data?.refreshToken) {
-      setAccessToken(data.refreshToken.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken.refreshToken);
-      return data.refreshToken.accessToken;
-    }
-    return null;
-  } catch (error) {
-    console.error("Error refreshing token:", error);
-    return null;
-  }
+/**
+ * Removes both the access token and refresh token from localStorage.
+ */
+export const clearTokens = (): void => {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
 };
