@@ -14,6 +14,7 @@ import { Provider } from "./components/ui/provider";
 import RootLayout from "./layouts/RootLayout";
 
 const Home = lazy(() => import("./routes/home"));
+const CheckoutPage = lazy(() => import("./routes/checkout"));
 const ProductsPage = lazy(() => import("./routes/products"));
 const Login = lazy(() => import("./routes/auth/login"));
 const Register = lazy(() => import("./routes/auth/register"));
@@ -112,6 +113,22 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<div>Cargando registro...</div>}>
             <Register />
+          </Suspense>
+        ),
+      },
+      {
+        path: "products",
+        element: (
+          <Suspense fallback={<div>Cargando lista de productos...</div>}>
+            <ProductsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "checkout",
+        element: (
+          <Suspense fallback={<div>Cargando orden...</div>}>
+            <CheckoutPage />
           </Suspense>
         ),
       },

@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client/react/hooks";
+import { FaCartShopping } from "react-icons/fa6";
 
 import {
   Box,
@@ -18,8 +19,13 @@ import {
   Center,
   Spinner,
   Text,
+  SimpleGrid,
+  HStack,
+  Badge,
 } from "@chakra-ui/react";
 
+import { CartSidebar } from "@/components/cartSiderbar";
+import { ProductCard } from "@/components/productCard";
 import { toaster } from "@/components/ui/toaster";
 import {
   ALL_PRODUCTS,
@@ -28,7 +34,7 @@ import {
   UPDATE_PRODUCT,
 } from "@/graphql/products";
 import useAuthStore from "@/store/auth";
-
+import { useCartStore } from "@/store/cart";
 
 type Product = {
   id?: number;
@@ -50,11 +56,13 @@ type UpdateProductInput = Partial<Omit<Product, "id">>;
 
 export default function ProductsPage() {
   const [currentProduct, setCurrentProduct] = useState<Partial<Product> | null>(
-    null,
+    null
   );
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuthStore();
+  const onOpenSidebar = useCartStore((state) => state.onOpenSidebar);
+  const { cartItems } = useCartStore();
 
   const {
     data,
@@ -104,7 +112,7 @@ export default function ProductsPage() {
             duration: 3000,
           });
         },
-      },
+      }
     );
 
   const [updateProduct, { loading: updateLoading, error: updateError }] =
@@ -151,7 +159,7 @@ export default function ProductsPage() {
             duration: 3000,
           });
         },
-      },
+      }
     );
 
   const handleCreate = () => {
@@ -200,6 +208,10 @@ export default function ProductsPage() {
     } catch (error) {}
   };
 
+  const handleCart = () => {
+    onOpenSidebar();
+  };
+
   if (queryLoading) {
     return (
       <Center flexDirection="column" minH="100vh">
@@ -228,7 +240,44 @@ export default function ProductsPage() {
 
   return (
     <Box p={6}>
-      <Flex justify="space-between" mb={6}>
+      <Heading mb={6} size="md">
+        Catalogo de Productos
+      </Heading>
+
+      <HStack justifyContent="flex-end">
+        <Badge
+          colorPalette="red"
+          cursor="pointer"
+          size="lg"
+          variant="outline"
+          onClick={handleCart}
+        >
+          <FaCartShopping />
+          {cartItems.length}
+        </Badge>
+      </HStack>
+      {/* Aquí es donde agregas la visualización de los productos para que el usuario agregue al carrito */}
+      {products.length === 0 ? (
+        <Text color="gray.500" fontSize="lg" textAlign="center">
+          No hay productos disponibles para la compra.
+        </Text>
+      ) : (
+        <SimpleGrid
+          columns={{ base: 1, sm: 2, md: 3, lg: 4 }}
+          gap={4}
+          justifyContent="center"
+        >
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product as any} />
+          ))}
+        </SimpleGrid>
+      )}
+
+      {/* Aquí es donde agregas el CartSidebar */}
+
+      <CartSidebar />
+
+      <Flex justify="space-between" mb={6} mt={6}>
         <Heading size="lg">Gestión de Productos</Heading>
         <Button colorScheme="teal" onClick={handleCreate}>
           + Nuevo Producto
